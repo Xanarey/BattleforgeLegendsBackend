@@ -31,4 +31,12 @@ public class BattleService {
         inviter.setStatus(UserStatus.ONLINE);
         userService.saveUser(inviter);
     }
+
+    public void endBattle(User inviter, User invitee) {
+        inviter.setStatus(UserStatus.ONLINE);
+        invitee.setStatus(UserStatus.ONLINE);
+        userService.saveUser(inviter);
+        userService.saveUser(invitee);
+    }
+
 }
