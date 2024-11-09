@@ -27,7 +27,8 @@ public class UserService {
     }
 
     public List<User> getAllExceptCurrentUser(String currentUsername) {
-        return userRepository.findAll().stream()
+        return userRepository.findAll()
+                .stream()
                 .filter(user -> !user.getUsername().equals(currentUsername))
                 .toList();
     }

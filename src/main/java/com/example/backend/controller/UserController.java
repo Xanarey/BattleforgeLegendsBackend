@@ -1,15 +1,12 @@
 package com.example.backend.controller;
 
 import com.example.backend.model.User;
-import com.example.backend.model.UserStatus;
 import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -31,6 +28,7 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsersExceptCurrentUser(@PathVariable String username) {
         return ResponseEntity.ok(userService.getAllExceptCurrentUser(username));
     }
+
 
     @GetMapping("/id/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
