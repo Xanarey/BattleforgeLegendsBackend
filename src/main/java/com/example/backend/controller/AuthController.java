@@ -50,14 +50,16 @@ public class AuthController {
     }
 
     @MessageMapping("/update-status")
-    @SendTo("/topic/status")
     public StatusMessage updateStatus(StatusMessage statusMessage) {
+        System.out.println("Получено сообщение на сервере: " + statusMessage);
         User user = userService.getUserByUsername(statusMessage.getUsername());
         if (user != null) {
             user.setStatus(UserStatus.valueOf(statusMessage.getStatus()));
             userService.saveUser(user);
+            messagingTemplate.convertAndSend("/topic/status", new StatusMessage(user.getUsername(), statusMessage.getStatus()));
         }
         return statusMessage;
     }
+
 
 }
