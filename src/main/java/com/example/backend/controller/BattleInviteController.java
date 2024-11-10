@@ -44,8 +44,20 @@ public class BattleInviteController {
 
 
     @PostMapping("/invite/response")
-    public ResponseEntity<?> respondToInvite() {
-        return new ResponseEntity<>("null", HttpStatus.OK);
+    public ResponseEntity<?> respondToInvite(@RequestBody InviteRequest inviteRequest, boolean chose) {
+        User inviter = userService.getUserByUsername(inviteRequest.getInviterUsername());
+        User invitee = userService.getUserByUsername(inviteRequest.getInviteeUsername());
+        if (chose)
+            battleService.startBattle(inviter, invitee);
+        if (!chose)
+            battleService.declineInvite(inviter);
+
+        Map<String, String> responseMessage = new HashMap<>();
+        responseMessage.put("message", "Игрок " + invitee.getUsername() + " отклонил ваше приглашение.");
+        messagingTemplate.convertAndSendToUser(inviter.getUsername(), "/queue/decline", responseMessage);
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

@@ -27,14 +27,10 @@ public class BattleService {
         Map<String, String> inviteData = new HashMap<>();
         inviteData.put("inviterUsername", inviter.getUsername());
 
-        messagingTemplate.convertAndSend("/topic/test", "Тестовое сообщение для проверки");
         messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/invite", inviteData);
         System.out.println("Отправка сообщения через convertAndSendToUser выполнена.");
 
     }
-
-
-
 
     public void startBattle(User inviter, User invitee) {
         inviter.setStatus(UserStatus.IN_GAME);
