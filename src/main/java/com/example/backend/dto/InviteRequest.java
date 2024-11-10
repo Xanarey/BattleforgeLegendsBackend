@@ -6,4 +6,5 @@ import lombok.Data;
 public class InviteRequest {
     private String inviterUsername;
     private String inviteeUsername;
+    private boolean chose;
 }
