@@ -38,8 +38,9 @@ public class BattleService {
         updateUserStatus(user);
         updateUserStatus(opponent);
 
-        sendLeaveNotification(opponentUsername, "Ваш соперник покинул бой. Вы победили!", "/search");
-        sendLeaveNotification(username, "Вы покинули бой.", null);
+        sendLeaveNotification(opponentUsername, "Ваш соперник покинул бой. Вы победили!", "/menu", false);
+        sendLeaveNotification(username, "Вы покинули бой.", null, true); // Для покидающего игрока установим reloadPage = true
+
     }
 
     private void updateUserStatus(User user) {
@@ -49,14 +50,18 @@ public class BattleService {
         messagingTemplate.convertAndSend("/topic/status", statusUpdate);
     }
 
-    private void sendLeaveNotification(String username, String message, String redirectUrl) {
+    private void sendLeaveNotification(String username, String message, String redirectUrl, boolean refreshPage) {
         Map<String, String> notification = new HashMap<>();
         notification.put("message", message);
         if (redirectUrl != null) {
             notification.put("redirectUrl", redirectUrl);
         }
+        if (refreshPage) {
+            notification.put("refreshPage", "true");
+        }
         messagingTemplate.convertAndSendToUser(username, "/queue/leave", notification);
     }
+
 
     public void startBattle(User inviter, User invitee) {
         inviter.setStatus(UserStatus.IN_GAME);
