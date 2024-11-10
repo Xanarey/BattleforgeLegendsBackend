@@ -32,10 +32,8 @@ public class AuthController {
 
     @GetMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username) {
-        System.out.println("Получен запрос на проверку пользователя: " + username);
         Optional<User> user = Optional.ofNullable(userService.getUserByUsername(username));
         if (user.isPresent()) {
-            System.out.println("Пользователь найден: " + username);
             User existingUser = user.get();
             existingUser.setStatus(UserStatus.ONLINE);
             userService.saveUser(existingUser);
@@ -44,14 +42,12 @@ public class AuthController {
 
             return ResponseEntity.ok("User found");
         } else {
-            System.out.println("Пользователь не найден: " + username);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
 
     @MessageMapping("/update-status")
     public StatusMessage updateStatus(StatusMessage statusMessage) {
-        System.out.println("Получено сообщение на сервере: " + statusMessage);
         User user = userService.getUserByUsername(statusMessage.getUsername());
         if (user != null) {
             user.setStatus(UserStatus.valueOf(statusMessage.getStatus()));

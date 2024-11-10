@@ -8,11 +8,13 @@ import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -35,13 +37,10 @@ public class BattleInviteController {
         User inviter = userService.getUserByUsername(inviteRequest.getInviterUsername());
         User invitee = userService.getUserByUsername(inviteRequest.getInviteeUsername());
 
-        System.out.println("BattleInviteController.invitePlayer : " + inviter.getUsername() + " приглашает в бой " + invitee.getUsername() + "'a");
-
         battleService.sendInvite(inviter, invitee);
 
         return ResponseEntity.ok("Приглашение отправлено");
     }
-
 
     @PostMapping("/invite/response")
     public ResponseEntity<?> respondToInvite(@RequestBody InviteRequest inviteRequest) {
@@ -68,9 +67,13 @@ public class BattleInviteController {
             messagingTemplate.convertAndSendToUser(inviter.getUsername(), "/queue/decline", responseMessageDeclineInvite);
         }
 
-
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @MessageMapping("/battle/leave")
+    public void leaveBattle(Map<String, String> payload) {
+        battleService.leaveBattle(payload);
+    }
+
 
 }

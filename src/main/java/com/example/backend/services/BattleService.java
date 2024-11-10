@@ -21,15 +21,41 @@ public class BattleService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendInvite(User inviter, User invitee) {
-        System.out.println("Отправка приглашения пользователю: " + invitee.getUsername());
-        System.out.println("Имя пригласившего: " + inviter.getUsername());
-        Map<String, String> inviteData = new HashMap<>();
-        inviteData.put("inviterUsername", inviter.getUsername());
+    public void leaveBattle(Map<String, String> payload) {
+        String username = payload.get("username");
+        String opponentUsername = payload.get("opponentUsername");
+        String battleId = payload.get("battleId");
 
-        messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/invite", inviteData);
-        System.out.println("Отправка сообщения через convertAndSendToUser выполнена.");
+        User user = userService.getUserByUsername(username);
+        User opponent = userService.getUserByUsername(opponentUsername);
 
+        user.setStatus(UserStatus.ONLINE);
+        opponent.setStatus(UserStatus.ONLINE);
+
+        userService.saveUser(user);
+        userService.saveUser(opponent);
+
+        updateUserStatus(user);
+        updateUserStatus(opponent);
+
+        sendLeaveNotification(opponentUsername, "Ваш соперник покинул бой. Вы победили!", "/search");
+        sendLeaveNotification(username, "Вы покинули бой.", null);
+    }
+
+    private void updateUserStatus(User user) {
+        Map<String, String> statusUpdate = new HashMap<>();
+        statusUpdate.put("username", user.getUsername());
+        statusUpdate.put("status", user.getStatus().toString());
+        messagingTemplate.convertAndSend("/topic/status", statusUpdate);
+    }
+
+    private void sendLeaveNotification(String username, String message, String redirectUrl) {
+        Map<String, String> notification = new HashMap<>();
+        notification.put("message", message);
+        if (redirectUrl != null) {
+            notification.put("redirectUrl", redirectUrl);
+        }
+        messagingTemplate.convertAndSendToUser(username, "/queue/leave", notification);
     }
 
     public void startBattle(User inviter, User invitee) {
@@ -37,17 +63,25 @@ public class BattleService {
         invitee.setStatus(UserStatus.IN_GAME);
         userService.saveUser(inviter);
         userService.saveUser(invitee);
+
+        updateUserStatus(inviter);
+        updateUserStatus(invitee);
+    }
+
+    public void sendInvite(User inviter, User invitee) {
+        System.out.println("Отправка приглашения пользователю: " + invitee.getUsername());
+        System.out.println("Имя пригласившего: " + inviter.getUsername());
+        Map<String, String> inviteData = new HashMap<>();
+        inviteData.put("inviterUsername", inviter.getUsername());
+
+        messagingTemplate.convertAndSend("/topic/test", "Тестовое сообщение для проверки");
+        messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/invite", inviteData);
+        System.out.println("Отправка сообщения через convertAndSendToUser выполнена.");
+
     }
 
     public void declineInvite(User inviter) {
         inviter.setStatus(UserStatus.ONLINE);
         userService.saveUser(inviter);
-    }
-
-    public void endBattle(User inviter, User invitee) {
-        inviter.setStatus(UserStatus.ONLINE);
-        invitee.setStatus(UserStatus.ONLINE);
-        userService.saveUser(inviter);
-        userService.saveUser(invitee);
     }
 }
