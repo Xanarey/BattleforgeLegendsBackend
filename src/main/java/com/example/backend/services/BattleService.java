@@ -41,6 +41,7 @@ public class BattleService {
         sendLeaveNotification(opponentUsername, "Ваш соперник покинул бой. Вы победили!", "/menu", false);
         sendLeaveNotification(username, "Вы покинули бой.", null, true); // Для покидающего игрока установим reloadPage = true
 
+
     }
 
     private void updateUserStatus(User user) {
