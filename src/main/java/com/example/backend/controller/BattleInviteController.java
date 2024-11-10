@@ -48,14 +48,15 @@ public class BattleInviteController {
         User inviter = userService.getUserByUsername(inviteRequest.getInviterUsername());
         User invitee = userService.getUserByUsername(inviteRequest.getInviteeUsername());
 
-        System.out.println(inviteRequest);
+        String battleId = UUID.randomUUID().toString();
 
         if (inviteRequest.isChose()) {
             battleService.startBattle(inviter, invitee);
 
             Map<String, String> responseMessageStartBattle = new HashMap<>();
             responseMessageStartBattle.put("message", "Бой начат!");
-            responseMessageStartBattle.put("redirectUrl", "/battle");
+            responseMessageStartBattle.put("battleId", battleId);
+            responseMessageStartBattle.put("redirectUrl", "/battle/" + battleId);
 
             messagingTemplate.convertAndSendToUser(inviter.getUsername(), "/queue/start", responseMessageStartBattle);
             messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/start", responseMessageStartBattle);
