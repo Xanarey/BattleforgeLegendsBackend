@@ -30,7 +30,6 @@ public class BattleService {
         messagingTemplate.convertAndSend("/topic/test", "Тестовое сообщение для проверки");
         messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/invite", inviteData);
         System.out.println("Отправка сообщения через convertAndSendToUser выполнена.");
-        messagingTemplate.convertAndSend("/topic/test", "Тестовое сообщение для проверки");
 
     }
 
