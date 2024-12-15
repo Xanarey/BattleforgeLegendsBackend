@@ -1,8 +1,8 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.InviteRequest;
+import com.example.backend.model.Game;
 import com.example.backend.model.User;
-import com.example.backend.model.UserStatus;
 import com.example.backend.services.BattleService;
 import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -46,8 +45,15 @@ public class BattleInviteController {
     public ResponseEntity<?> respondToInvite(@RequestBody InviteRequest inviteRequest) {
         User inviter = userService.getUserByUsername(inviteRequest.getInviterUsername());
         User invitee = userService.getUserByUsername(inviteRequest.getInviteeUsername());
-
         String battleId = UUID.randomUUID().toString();
+        Game game = new Game();
+        game.setBattleId(battleId);
+        game.setPlayerOne(inviter.getUsername());
+        game.setPlayerOne(invitee.getUsername());
+        game.setPlayerOneCards(inviter.getCards());
+        game.setPlayerOneCards(invitee.getCards());
+        game.setPlayerTwoCards(invitee.getCards());
+
 
         if (inviteRequest.isChose()) {
             battleService.startBattle(inviter, invitee);
@@ -59,6 +65,9 @@ public class BattleInviteController {
 
             messagingTemplate.convertAndSendToUser(inviter.getUsername(), "/queue/start", responseMessageStartBattle);
             messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/start", responseMessageStartBattle);
+
+            messagingTemplate.convertAndSendToUser(inviter.getUsername(), "/queue/start", game);
+            messagingTemplate.convertAndSendToUser(invitee.getUsername(), "/queue/start", game);
         } else {
             battleService.declineInvite(inviter);
 
